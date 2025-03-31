@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Добавьте эти строки в <head> -->
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" default>
+<meta name="apple-mobile-web-app-title" content="Тренажер слов">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">  <!-- Иконка для iOS -->
+
+    <title>Тренажер слов "Робинзон Крузо"</title>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .card {
+            border: 1px solid #d1d1d6;
+            border-radius: 10px;
+            padding: 15px 60px 15px 15px;
+            margin: 10px 0;
+            position: relative;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .hidden-part {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #e5e5ea;
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            margin: 0 5px 5px 0;
+            border-radius: 8px;
+            display: inline-block;
+            background: #e5e5ea;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        
+        .active-tab {
+            background: #007AFF;
+            color: white;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 120px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #d1d1d6;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        .card-actions {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .card-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(120,120,128,0.2);
+            border: none;
+        }
+        
+        .delete-btn {
+            color: #FF3B30;
+        }
+        
+        .mark-learned {
+            color: #34C759;
+        }
+        
+        .speak-btn {
+            background: none;
+            border: none;
+            color: #007AFF;
+            font-size: 16px;
+            padding: 0 5px;
+            cursor: pointer;
+        }
+        
+        #bookContent {
+            white-space: pre-wrap;
+            padding: 15px;
+            border: 1px solid #d1d1d6;
+            border-radius: 8px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            line-height: 1.6;
+            font-size: 17px;
+        }
+        
+        .quiz-option {
+            padding: 12px;
+            margin: 6px 0;
+            background: #f2f2f7;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .quiz-option:hover {
+            background: #e5e5ea;
+        }
+        
+        #responseTimeDisplay {
+            font-size: 14px;
+            color: #8E8E93;
+            margin-left: auto;
+        }
+        
+        .file-input-label {
+            padding: 8px 15px;
+            border-radius: 5px;
+            background: #007AFF;
+            color: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .difficulty-selector {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #d1d1d6;
+            margin-left: 10px;
+        }
+        
+        .word-progress {
+            font-size: 12px;
+            color: #8E8E93;
+            margin-top: 3px;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #e5e5ea;
+            border-radius: 2px;
+            margin-top: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #34C759;
+            width: 0%;
+        }
+        
+        #audioPlayerContainer {
+            padding: 15px;
+            border: 1px solid #d1d1d6;
+            border-radius: 8px;
+            background: #f9f9f9;
+            margin-bottom: 15px;
+        }
+        
+        #quizQuestion {
+            text-align: center;
+            color: #000;
+            font-size: 2.2em;
+            margin: 20px 0;
+        }
+        
+        .control-panel {
+            width: 100%;
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #d1d1d6;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .panel-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        button {
+            padding: 8px 15px;
+            border-radius: 5px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            height: 36px;
+        }
+        
+        button.delete {
+            background: #FF3B30;
+        }
+        
+        select {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #d1d1d6;
+            height: 36px;
+        }
+        
+        #audioError {
+            color: #FF3B30;
+            margin-top: 5px;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .word-hover {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .word-hover:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #007AFF;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .word-hover:hover {
+            background-color: #f0f0f0;
+            border-radius: 2px;
+        }
+        
+        .font-size-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .font-size-btn {
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .toggle-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .search-input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d1d6;
+            font-size: 14px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            select {
+                background: #2c2c2e;
+                color: #fff;
+                border-color: #38383a;
+            }
+        }
+   
+    /* Детская тема */
+    .child-theme {
+        --primary-color: #FF6B6B;
+        --secondary-color: #4ECDC4;
+        --accent-color: #FFE66D;
+        --background-color: #F7FFF7;
+        --text-color: #292F36;
+        --card-color: #FFFFFF;
+        --shadow-color: rgba(0,0,0,0.1);
+    }
+
+    body.child-theme {
+        font-family: 'Comic Sans MS', 'Marker Felt', 'Arial Rounded MT Bold', sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 15px;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .child-theme h1 {
+        color: var(--primary-color);
+        text-shadow: 2px 2px 0 var(--accent-color);
+        font-size: 2.5em;
+        margin-bottom: 20px;
+    }
+
+    .child-theme .card {
+        border: 3px dashed var(--primary-color);
+        border-radius: 20px;
+        padding: 15px 60px 15px 15px;
+        margin: 15px 0;
+        position: relative;
+        background: var(--card-color);
+        box-shadow: 0 4px 8px var(--shadow-color);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .child-theme .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px var(--shadow-color);
+    }
+
+    .child-theme .hidden-part {
+        display: none;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 2px dotted var(--secondary-color);
+    }
+
+    .child-theme .tab {
+        padding: 10px 15px;
+        margin: 0 5px 5px 0;
+        border-radius: 15px;
+        display: inline-block;
+        background: var(--secondary-color);
+        font-size: 15px;
+        cursor: pointer;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+    .child-theme .tab:hover {
+        transform: scale(1.05);
+    }
+
+    .child-theme .active-tab {
+        background: var(--primary-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .child-theme textarea {
+        width: 100%;
+        height: 120px;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 15px;
+        border: 3px solid var(--secondary-color);
+        font-size: 16px;
+        font-family: inherit;
+        background-color: var(--card-color);
+    }
+
+    .child-theme .card-actions {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        gap: 10px;
+    }
+
+    .child-theme .card-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent-color);
+        border: none;
+        font-size: 18px;
+        transition: all 0.3s;
+    }
+
+    .child-theme .card-btn:hover {
+        transform: scale(1.2);
+    }
+
+    .child-theme .delete-btn {
+        color: #FF3B30;
+        background: #FFD3D3;
+    }
+
+    .child-theme .mark-learned {
+        color: #34C759;
+        background: #D3FFE0;
+    }
+
+    .child-theme .speak-btn {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        font-size: 20px;
+        padding: 0 5px;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+
+    .child-theme .speak-btn:hover {
+        transform: scale(1.3);
+    }
+
+    .child-theme #bookContent {
+        white-space: pre-wrap;
+        padding: 15px;
+        border: 3px solid var(--secondary-color);
+        border-radius: 15px;
+        margin: 10px 0;
+        background: var(--card-color);
+        line-height: 1.6;
+        font-size: 17px;
+    }
+
+    .child-theme .quiz-option {
+        padding: 15px;
+        margin: 10px 0;
+        background: var(--accent-color);
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .child-theme .quiz-option:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: scale(1.02);
+    }
+
+    .child-theme button {
+        padding: 10px 20px;
+        border-radius: 15px;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        cursor: pointer;
+        height: 40px;
+        font-weight: bold;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .child-theme button:hover {
+        background: var(--secondary-color);
+        transform: scale(1.05);
+    }
+
+    .child-theme .word-hover:hover {
+        background-color: var(--accent-color);
+        border-radius: 5px;
+        padding: 0 3px;
+    }
+
+    /* Анимации */
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .child-theme .speak-btn:hover {
+        animation: bounce 0.5s;
+    }
+
+    /* Дополнительные элементы */
+    .child-theme .card::before {
+        content: "✏️";
+        position: absolute;
+        left: -15px;
+        top: -15px;
+        font-size: 24px;
+        background: white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px var(--shadow-color);
+    }
+
+    .child-theme .progress-fill {
+        background: var(--secondary-color);
+        height: 8px;
+        border-radius: 4px;
+    }
+
+    .child-theme .progress-bar {
+        height: 8px;
+        background: #e5e5ea;
+        border-radius: 4px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+
+
+    /* Морская тема */
+    .adventure-theme {
+        --primary-color: #1E88E5;
+        --secondary-color: #0D47A1;
+        --accent-color: #FFC107;
+        --background-color: #E3F2FD;
+        --text-color: #263238;
+        --card-color: #FFFFFF;
+        --shadow-color: rgba(0,0,0,0.1);
+        --wave-color: #BBDEFB;
+    }
+
+    body.adventure-theme {
+        font-family: 'Trebuchet MS', 'Arial', sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        background-image: 
+            linear-gradient(to bottom, transparent 95%, var(--wave-color) 100%),
+            repeating-linear-gradient(
+                -45deg,
+                var(--background-color),
+                var(--background-color) 20px,
+                var(--wave-color) 20px,
+                var(--wave-color) 40px
+            );
+        background-size: 100% 100%, 200% 200%;
+        animation: wave 15s linear infinite;
+    }
+
+    @keyframes wave {
+        0% { background-position: 0 0, 0 0; }
+        100% { background-position: 0 0, -40px 40px; }
+    }
+
+    .adventure-theme h1 {
+        color: var(--secondary-color);
+        position: relative;
+        display: inline-block;
+        padding-bottom: 10px;
+    }
+
+    .adventure-theme h1::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-color));
+        border-radius: 3px;
+    }
+
+    .adventure-theme .card {
+        border: 2px solid var(--primary-color);
+        border-radius: 8px 8px 8px 0;
+        padding: 15px 60px 15px 15px;
+        margin: 15px 0;
+        position: relative;
+        background: var(--card-color);
+        box-shadow: 3px 3px 0 var(--shadow-color);
+        transition: all 0.3s;
+        background-image: linear-gradient(to bottom right, var(--card-color) 90%, #E3F2FD 100%);
+    }
+
+    .adventure-theme .card:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 5px 5px 0 var(--shadow-color);
+    }
+
+    .adventure-theme .card::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        width: 10px;
+        height: 10px;
+        background: var(--accent-color);
+        clip-path: polygon(0 0, 0% 100%, 100% 0);
+    }
+
+    .adventure-theme .hidden-part {
+        display: none;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed var(--primary-color);
+    }
+
+    .adventure-theme .tab {
+        padding: 8px 15px;
+        margin: 0 5px 5px 0;
+        border-radius: 4px 4px 0 0;
+        display: inline-block;
+        background: var(--primary-color);
+        font-size: 15px;
+        cursor: pointer;
+        color: white;
+        position: relative;
+        transition: all 0.3s;
+    }
+
+    .adventure-theme .tab:hover {
+        background: var(--secondary-color);
+    }
+
+    .adventure-theme .active-tab {
+        background: var(--secondary-color);
+        color: white;
+        font-weight: bold;
+    }
+
+    .adventure-theme .active-tab::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: var(--accent-color);
+    }
+
+    .adventure-theme textarea {
+        width: 100%;
+        height: 120px;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 4px;
+        border: 2px solid var(--primary-color);
+        font-size: 16px;
+        font-family: inherit;
+        background-color: var(--card-color);
+        box-shadow: inset 2px 2px 3px var(--shadow-color);
+    }
+
+    .adventure-theme .card-actions {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        gap: 8px;
+    }
+
+    .adventure-theme .card-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-color);
+        border: none;
+        color: white;
+        font-size: 16px;
+        transition: all 0.3s;
+        box-shadow: 1px 1px 2px var(--shadow-color);
+    }
+
+    .adventure-theme .card-btn:hover {
+        transform: rotate(15deg) scale(1.1);
+    }
+
+    .adventure-theme .delete-btn {
+        background: #E53935;
+    }
+
+    .adventure-theme .mark-learned {
+        background: #43A047;
+    }
+
+    .adventure-theme .speak-btn {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        font-size: 18px;
+        padding: 0 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .adventure-theme .speak-btn:hover {
+        color: var(--secondary-color);
+        transform: scale(1.2);
+    }
+
+    .adventure-theme #bookContent {
+        white-space: pre-wrap;
+        padding: 15px;
+        border: 2px solid var(--primary-color);
+        border-radius: 4px;
+        margin: 10px 0;
+        background: var(--card-color);
+        line-height: 1.6;
+        font-size: 17px;
+        box-shadow: inset 1px 1px 3px var(--shadow-color);
+    }
+
+    .adventure-theme .quiz-option {
+        padding: 12px;
+        margin: 8px 0;
+        background: var(--primary-color);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: white;
+        box-shadow: 2px 2px 0 var(--shadow-color);
+    }
+
+    .adventure-theme .quiz-option:hover {
+        background: var(--secondary-color);
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 var(--shadow-color);
+    }
+
+    .adventure-theme button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        cursor: pointer;
+        height: 36px;
+        font-weight: bold;
+        transition: all 0.3s;
+        box-shadow: 2px 2px 0 var(--shadow-color);
+    }
+
+    .adventure-theme button:hover {
+        background: var(--secondary-color);
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 var(--shadow-color);
+    }
+
+    .adventure-theme button.delete {
+        background: #E53935;
+    }
+
+    .adventure-theme .word-hover:hover {
+        background-color: rgba(255, 193, 7, 0.3);
+        border-radius: 2px;
+        padding: 0 2px;
+    }
+
+    .adventure-theme .progress-fill {
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        height: 6px;
+        border-radius: 3px;
+    }
+
+    .adventure-theme .progress-bar {
+        height: 6px;
+        background: #CFD8DC;
+        border-radius: 3px;
+        margin-top: 4px;
+        overflow: hidden;
+        box-shadow: inset 1px 1px 2px var(--shadow-color);
+    }
+
+    /* Дополнительные элементы */
+    .adventure-theme .control-panel {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .adventure-theme .control-panel::before {
+        content: "⚓";
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        font-size: 24px;
+        opacity: 0.1;
+    }
+
+    .adventure-theme #quizQuestion {
+        position: relative;
+    }
+
+    .adventure-theme #quizQuestion::after {
+        content: "🌊";
+        position: absolute;
+        right: 0;
+        top: 0;
+        font-size: 24px;
+        opacity: 0.2;
+    }
+
+
+
+</style>
+
+</head>
+
+<body>
+    <h1>Тренажер слов "Робинзон Крузо"</h1>
+    
+    <div style="margin-bottom: 15px;">
+        <div class="tab active-tab" data-tab="new">Новые</div>
+        <div class="tab" data-tab="learned">Изученные</div>
+        <div class="tab" data-tab="quiz">Викторина</div>
+        <div class="tab" data-tab="text">Текст</div>
+        <div class="tab" data-tab="archive">Архив</div>
+    </div>
+        
+
+
+<div style="position: fixed; bottom: 20px; right: 20px;">
+    <button onclick="toggleTheme()" style="padding: 10px; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; background: #FF6B6B; color: white; border: none; cursor: pointer;">🎨</button>
+</div>
+
+
+        
+    <div id="newCards">
+        <textarea id="wordInput" placeholder="Слово|Часть речи|Перевод|Транскрипция|Пример&#10;Ship|Noun|Корабль|[ʃɪp]|The ship was anchored"></textarea>
+
+<div class="control-panel">
+    <div class="panel-actions">
+        <button onclick="createCards()">Создать карточки</button>
+                
+        <label class="file-input-label">
+            Загрузить
+            <input type="file" id="fileInput" accept=".txt,.csv" hidden>
+        </label>
+                
+        <select id="batchActionType">
+            <option value="all">Все карточки</option>
+            <option value="noun">Существительные</option>
+            <option value="verb">Глаголы</option>
+            <option value="adjective">Прилагательные</option>
+        </select>
+                
+        <button onclick="batchMoveToLearned()">Перенести</button>
+        <button onclick="batchDeleteCards()" class="delete">Удалить</button>
+                
+        <label class="toggle-option">
+            <input type="checkbox" id="toggleUploadField" onchange="toggleUploadField()">
+            <span>Скрыть поле ввода</span>
+        </label>
+
+        <label class="toggle-option">
+            <input type="checkbox" id="soundToggle" checked>
+            <span>Звук</span>
+        </label>
+    </div>
+</div>
+
+
+        
+        <div id="cardsDisplay"></div>
+    </div>
+
+    <div id="learnedCards" style="display: none;"></div>
+
+    <div id="archiveCards" style="display: none;">
+        <input type="text" id="archiveSearch" class="search-input" placeholder="Поиск в архиве..." oninput="filterArchive()">
+        <div id="archiveDisplay"></div>
+    </div>
+
+
+
+    <div id="quizContainer" style="display: none;">
+        <div class="control-panel">
+            <div class="panel-actions">
+                <div>
+                    <span>Сложность:</span>
+                    <select class="difficulty-selector" id="difficultySelector">
+                        <option value="2">2 варианта</option>
+                        <option value="3" selected>3 варианта</option>
+                        <option value="4">4 варианта</option>
+                        <option value="5">5 вариантов</option>
+                    </select>
+                </div>
+                
+                <label class="toggle-option">
+                    <input type="checkbox" id="quizSoundToggle" checked>
+                    <span>Звук</span>
+                </label>
+                
+                <label class="toggle-option">
+                    <input type="checkbox" id="hideWordToggle">
+                    <span>Скрыть слово</span>
+                </label>
+                
+                <span id="responseTimeDisplay"></span>
+            </div>
+        </div>
+        
+        <div id="quizQuestion"></div>
+        <div id="quizOptions"></div>
+    </div>
+
+    <div id="textContainer" style="display: none;">
+        <div class="control-panel">
+            <div class="panel-actions">
+                <h2 style="margin: 0;">Текст произведения</h2>
+                
+                <label class="file-input-label">
+                    Загрузить текст
+                    <input type="file" id="textFileInput" accept=".txt" hidden>
+                </label>
+                
+                <label class="toggle-option">
+                    <input type="checkbox" id="textSoundToggle" checked>
+                    <span>Озвучка</span>
+                </label>
+            </div>
+        </div>
+        
+        <div id="audioPlayerContainer">
+            <div class="panel-actions" style="margin-bottom: 10px;">
+                <label class="file-input-label">
+                    Выбрать аудио
+                    <input type="file" id="audioFileInput" accept="audio/*" hidden onchange="handleAudioUpload(event)">
+                </label>
+                
+                <button onclick="playAudio()">Воспроизвести</button>
+                <button onclick="stopAudio()" class="delete">Остановить</button>
+            </div>
+            
+            <audio id="bookAudioPlayer" controls style="width: 100%;">
+                Ваш браузер не поддерживает аудиоэлемент.
+            </audio>
+            <div id="audioError"></div>
+        </div>
+        
+        <div class="font-size-controls">
+            <button class="font-size-btn" onclick="changeFontSize(-1)">A-</button>
+            <button class="font-size-btn" onclick="changeFontSize(1)">A+</button>
+        </div>
+        
+        <div id="bookContent"></div>
+    </div>
+
+    <script>
+// Инициализация данных
+let allCards = [];
+let newCards = [];
+let learnedCards = [];
+let archivedCards = [];
+let quizStartTime;
+let currentQuizWord;
+let textSoundEnabled = true;
+
+// Элементы аудиоплеера
+const audioPlayer = document.getElementById('bookAudioPlayer');
+const audioPlayerContainer = document.getElementById('audioPlayerContainer');
+
+// Инициализация синтеза речи
+let synth = window.speechSynthesis;
+let voices = [];
+
+
+function toggleTheme() {
+    // Удаляем все темы
+    document.body.classList.remove('child-theme', 'adventure-theme');
+    
+    // Определяем следующую тему
+    const themes = ['default', 'child', 'adventure'];
+    const currentTheme = localStorage.getItem('theme') || 'default';
+    const nextIndex = (themes.indexOf(currentTheme) + 1) % themes.length;
+    const nextTheme = themes[nextIndex];
+    
+    // Применяем новую тему
+    if (nextTheme === 'child') {
+        document.body.classList.add('child-theme');
+    } else if (nextTheme === 'adventure') {
+        document.body.classList.add('adventure-theme');
+    }
+    
+    localStorage.setItem('theme', nextTheme);
+}
+
+// При загрузке проверяем сохраненную тему
+window.addEventListener('load', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'child') {
+        document.body.classList.add('child-theme');
+    } else if (savedTheme === 'adventure') {
+        document.body.classList.add('adventure-theme');
+    }
+});
+
+
+function initSpeech() {
+    if (!('speechSynthesis' in window)) {
+        console.warn("Браузер не поддерживает синтез речи");
+        return;
+    }
+    
+    // Загружаем голоса сразу, если они доступны
+    voices = synth.getVoices();
+    
+    // Добавляем обработчик на случай, если голоса загрузятся позже
+    synth.onvoiceschanged = () => {
+        voices = synth.getVoices();
+    };
+}
+
+// Обработчик загрузки файла для новых карточек
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // Просто загружаем текст в textarea без создания карточек
+        document.getElementById('wordInput').value = e.target.result;
+        showNotification(`Файл загружен. Нажмите "Создать карточки"`, 2000);
+    };
+    reader.readAsText(file);
+    
+    e.target.value = '';
+});
+
+
+
+function speakWord(word, isText = false) {
+    try {
+        if (!document.getElementById('soundToggle')?.checked) return;
+        if (isText && !textSoundEnabled) return;
+        
+        if (synth.speaking) synth.cancel();
+        
+        if (!voices.length) {
+            console.warn("Голоса не загружены");
+            return;
+        }
+        
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.voice = voices.find(v => v.lang === 'en-US') || voices[0];
+        utterance.rate = 0.7;
+        utterance.onerror = (e) => {
+            console.error("Ошибка синтеза речи:", e);
+        };
+        synth.speak(utterance);
+    } catch (e) {
+        console.error("Ошибка синтеза речи:", e);
+    }
+}
+
+// Функции для работы с аудио
+function handleAudioUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const errorElement = document.getElementById('audioError');
+    errorElement.style.display = 'none';
+    
+    const validTypes = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/aac', 'audio/x-m4a'];
+    if (!validTypes.includes(file.type)) {
+        showAudioError(`Неподдерживаемый формат: ${file.type}. Используйте MP3, AAC или WAV.`);
+        return;
+    }
+    
+    const fileURL = URL.createObjectURL(file);
+    audioPlayer.src = fileURL;
+    audioPlayer.load();
+    
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        showAudioError("Нажмите 'Воспроизвести' после загрузки файла");
+    }
+}
+
+function playAudio() {
+    if (!audioPlayer.src) {
+        showAudioError("Сначала загрузите аудиофайл");
+        return;
+    }
+    
+    const errorElement = document.getElementById('audioError');
+    audioPlayer.play().catch(e => {
+        showAudioError(`Ошибка воспроизведения: ${e.message}`);
+    });
+}
+
+function stopAudio() {
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+}
+
+function showAudioError(message) {
+    const errorElement = document.getElementById('audioError');
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+}
+
+// Обработчик загрузки текста
+document.getElementById('textFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const bookContent = document.getElementById('bookContent');
+        bookContent.innerHTML = '';
+        
+        const words = text.split(/(\s+)/);
+        words.forEach(word => {
+            if (word.trim() === '') {
+                bookContent.appendChild(document.createTextNode(word));
+                return;
+            }
+            
+            const span = document.createElement('span');
+            span.className = 'word-hover';
+            span.textContent = word;
+            
+            const card = allCards.find(c => 
+                c.word.toLowerCase() === word.toLowerCase().replace(/[.,!?]/g, '')
+            );
+            
+            if (card) {
+                span.title = card.translation;
+                span.style.cursor = 'pointer';
+                span.style.position = 'relative';
+                span.style.display = 'inline-block';
+                
+                span.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    speakWord(card.word, true);
+                });
+            }
+            
+            bookContent.appendChild(span);
+        });
+    };
+    reader.readAsText(file);
+});
+
+// Новые функции для групповых действий
+function batchMoveToLearned() {
+    const actionType = document.getElementById('batchActionType').value;
+    let cardsToMove = [];
+    
+    if (actionType === 'all') {
+        cardsToMove = [...newCards];
+    } else {
+        cardsToMove = newCards.filter(card => {
+            const part = card.part.toLowerCase();
+            if (actionType === 'noun') return part.includes('noun') || part.includes('сущ');
+            if (actionType === 'verb') return part.includes('verb') || part.includes('глаг');
+            if (actionType === 'adjective') return part.includes('adjective') || part.includes('прил');
+            return true;
+        });
+    }
+    
+    learnedCards.push(...cardsToMove);
+    newCards = newCards.filter(card => !cardsToMove.includes(card));
+    renderCards();
+    
+    alert(`Перемещено ${cardsToMove.length} карточек в изученные`);
+}
+
+function batchDeleteCards() {
+    const actionType = document.getElementById('batchActionType').value;
+    let cardsToDelete = [];
+    
+    if (actionType === 'all') {
+        cardsToDelete = [...newCards];
+    } else {
+        cardsToDelete = newCards.filter(card => {
+            const part = card.part.toLowerCase();
+            if (actionType === 'noun') return part.includes('noun') || part.includes('сущ');
+            if (actionType === 'verb') return part.includes('verb') || part.includes('глаг');
+            if (actionType === 'adjective') return part.includes('adjective') || part.includes('прил');
+            return true;
+        });
+    }
+    
+    newCards = newCards.filter(card => !cardsToDelete.includes(card));
+    allCards = allCards.filter(card => !cardsToDelete.includes(card));
+    renderCards();
+    
+    alert(`Удалено ${cardsToDelete.length} карточек`);
+}
+
+// Основные функции
+
+// Основная функция создания карточек (модифицированная)
+
+function createCards() {
+    const input = document.getElementById('wordInput').value;
+    if (!input.trim()) return;
+    
+    // Создаем временный объект для новых карточек
+    const newUniqueCards = {};
+    
+    // Обрабатываем новые данные
+    input.split('\n')
+        .filter(line => line.trim())
+        .forEach(line => {
+            const parts = line.split('|').map(p => p.trim());
+            const word = parts[0] || '';
+            const translation = parts[2] || '';
+            const uniqueKey = `${word.toLowerCase()}_${translation.toLowerCase()}`;
+            
+            if (!newUniqueCards[uniqueKey]) {
+                newUniqueCards[uniqueKey] = {
+                    word: word,
+                    part: parts[1] || '',
+                    translation: translation,
+                    transcription: parts[3] || '',
+                    example: parts[4] || '',
+                    literal: parts[5] || '',
+                    errors: 0,
+                    attempts: 0
+                };
+            } else {
+                // Объединяем примеры для дубликатов в новом вводе
+                if (parts[4] && !newUniqueCards[uniqueKey].example.includes(parts[4])) {
+                    newUniqueCards[uniqueKey].example += (newUniqueCards[uniqueKey].example ? "; " : "") + parts[4];
+                }
+            }
+        });
+    
+    // Фильтруем новые карточки, исключая существующие дубликаты
+    const filteredNewCards = Object.values(newUniqueCards).filter(newCard => {
+        const key = `${newCard.word.toLowerCase()}_${newCard.translation.toLowerCase()}`;
+        return !allCards.some(existingCard => 
+            `${existingCard.word.toLowerCase()}_${existingCard.translation.toLowerCase()}` === key
+        );
+    });
+    
+    // Добавляем новые карточки
+    allCards.push(...filteredNewCards);
+    newCards.push(...filteredNewCards);
+    
+    renderCards();
+    document.getElementById('wordInput').value = ''; // Автоматическая очистка
+    showNotification(`Добавлено ${filteredNewCards.length} новых карточек. Всего: ${allCards.length}`);
+}
+
+// Обработчик загрузки файла (обновленный)
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // Просто загружаем текст в textarea без автоматического создания
+        document.getElementById('wordInput').value = e.target.result;
+        showNotification(`Файл загружен. Нажмите "Создать карточки"`, 2000);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+});
+
+// Функция очистки поля ввода (без удаления карточек)
+function clearInput() {
+    document.getElementById('wordInput').value = '';
+}
+
+
+
+function showNotification(message, duration = 3000) {
+    const notification = document.createElement('div');
+    notification.style.position = 'fixed';
+    notification.style.bottom = '20px';
+    notification.style.right = '20px';
+    notification.style.backgroundColor = '#007AFF';
+    notification.style.color = 'white';
+    notification.style.padding = '10px 15px';
+    notification.style.borderRadius = '5px';
+    notification.style.zIndex = '1000';
+    notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.5s';
+        setTimeout(() => notification.remove(), 500);
+    }, duration);
+}
+
+
+function toggleUploadField() {
+    const textarea = document.getElementById('wordInput');
+    const checkbox = document.getElementById('toggleUploadField');
+    textarea.style.display = checkbox.checked ? 'none' : 'block';
+}
+
+function renderCards() {
+    // Новые карточки
+    document.getElementById('cardsDisplay').innerHTML = newCards
+        .map(card => createCardHTML(card, false, false))
+        .join('');
+    
+    // Изученные карточки
+    document.getElementById('learnedCards').innerHTML = learnedCards
+        .sort((a, b) => a.word.localeCompare(b.word))
+        .map(card => createCardHTML(card, true, false))
+        .join('');
+    
+    // Архивные карточки
+    document.getElementById('archiveDisplay').innerHTML = archivedCards
+        .sort((a, b) => a.word.localeCompare(b.word))
+        .map(card => createCardHTML(card, true, true))
+        .join('');
+}
+
+function createCardHTML(card, isLearned, isArchived) {
+    const progressPercent = card.attempts > 0 
+        ? Math.round((1 - (card.errors / card.attempts)) * 100)
+        : 0;
+    
+    return `
+        <div class="card" onclick="toggleCardDetails(this)">
+            <div>
+                <strong>${escapeHtml(card.word)}</strong>
+                <button class="speak-btn" onclick="event.stopPropagation(); speakWord('${escapeSingleQuote(card.word)}')">🔊</button>
+                <span>(${escapeHtml(card.part)})</span>
+                <div class="card-actions">
+                    ${isArchived ? `
+                        <button class="card-btn" onclick="event.stopPropagation(); moveFromArchive('${escapeSingleQuote(card.word)}')" title="Вернуть в изученные">↩︎</button>
+                    ` : isLearned ? `
+                        <button class="card-btn delete-btn" onclick="event.stopPropagation(); deleteCard('${escapeSingleQuote(card.word)}', true)">✕</button>
+                        <button class="card-btn" onclick="event.stopPropagation(); moveToNew('${escapeSingleQuote(card.word)}')" title="Вернуть в новые">↩︎</button>
+                        <button class="card-btn archive-btn" onclick="event.stopPropagation(); moveToArchive('${escapeSingleQuote(card.word)}')" title="В архив">🗄</button>
+                    ` : `
+                        <button class="card-btn delete-btn" onclick="event.stopPropagation(); deleteCard('${escapeSingleQuote(card.word)}', false)">✕</button>
+                        <button class="card-btn mark-learned" onclick="event.stopPropagation(); markAsLearned('${escapeSingleQuote(card.word)}')">✓</button>
+                    `}
+                </div>
+            </div>
+            ${isLearned && !isArchived ? `
+                <div class="word-progress">
+                    Прогресс: ${progressPercent}% (${card.attempts - card.errors}/${card.attempts})
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                </div>
+            ` : ''}
+            <div class="hidden-part">
+                <div><b>Перевод:</b> ${escapeHtml(card.translation)}</div>
+                ${card.transcription ? `<div><b>Транскрипция:</b> ${card.transcription}</div>` : ''}
+                ${card.example ? `
+                            <div style="margin-top:8px;">
+        <b>Пример:</b> ${escapeHtml(card.example)}
+        <button class="speak-btn" onclick="event.stopPropagation(); speakWord('${escapeSingleQuote(card.example)}')">🔊</button>
+    </div>
+
+                ` : ''}
+                ${card.literal ? `<div><small>Дословно: ${escapeHtml(card.literal)}</small></div>` : ''}
+            </div>
+        </div>
+    `;
+}
+
+function deleteCard(word, isLearned) {
+    if (isLearned) {
+        learnedCards = learnedCards.filter(c => c.word !== word);
+    } else {
+        newCards = newCards.filter(c => c.word !== word);
+    }
+    allCards = allCards.filter(c => c.word !== word);
+    renderCards();
+}
+
+function toggleCardDetails(cardElement) {
+    const details = cardElement.querySelector('.hidden-part');
+    details.style.display = details.style.display === 'block' ? 'none' : 'block';
+}
+
+function markAsLearned(word) {
+    const cardIndex = newCards.findIndex(c => c.word === word);
+    if (cardIndex === -1) return;
+    
+    learnedCards.push(newCards[cardIndex]);
+    newCards.splice(cardIndex, 1);
+    renderCards();
+}
+
+function moveToNew(word) {
+    const cardIndex = learnedCards.findIndex(c => c.word === word);
+    if (cardIndex === -1) return;
+    
+    newCards.unshift(learnedCards[cardIndex]);
+    learnedCards.splice(cardIndex, 1);
+    renderCards();
+}
+
+function moveToArchive(word) {
+    const cardIndex = learnedCards.findIndex(c => c.word === word);
+    if (cardIndex === -1) return;
+    
+    archivedCards.push(learnedCards[cardIndex]);
+    learnedCards.splice(cardIndex, 1);
+    renderCards();
+}
+
+function moveFromArchive(word) {
+    const cardIndex = archivedCards.findIndex(c => c.word === word);
+    if (cardIndex === -1) return;
+    
+    learnedCards.push(archivedCards[cardIndex]);
+    archivedCards.splice(cardIndex, 1);
+    renderCards();
+}
+
+function filterArchive() {
+    const searchTerm = document.getElementById('archiveSearch').value.toLowerCase();
+    const filtered = archivedCards.filter(card => 
+        card.word.toLowerCase().includes(searchTerm) || 
+        card.translation.toLowerCase().includes(searchTerm)
+    );
+    
+    document.getElementById('archiveDisplay').innerHTML = filtered
+        .sort((a, b) => a.word.localeCompare(b.word))
+        .map(card => createCardHTML(card, true, true))
+        .join('');
+}
+
+
+// Викторина
+function startQuiz() {
+    if (learnedCards.length < 3) {
+        document.getElementById('quizQuestion').innerHTML = 
+            '<span style="color:#FF3B30;">Нужно минимум 3 изученных слова!</span>';
+        document.getElementById('quizOptions').innerHTML = '';
+        return;
+    }
+    
+    currentQuizWord = learnedCards[Math.floor(Math.random() * learnedCards.length)];
+    
+    const hideWord = document.getElementById('hideWordToggle').checked;
+    document.getElementById('quizQuestion').textContent = hideWord ? '▬▬▬▬▬' : currentQuizWord.word;
+    
+    if (document.getElementById('quizSoundToggle').checked) {
+        speakWord(currentQuizWord.word);
+    }
+    
+    quizStartTime = Date.now();
+    generateQuizOptions();
+    
+    document.getElementById('quizQuestion').onclick = function() {
+        if (document.getElementById('quizSoundToggle').checked) {
+            speakWord(currentQuizWord.word);
+        }
+    };
+}
+
+function generateQuizOptions() {
+    const correctAnswer = currentQuizWord.translation;
+    const options = [correctAnswer];
+    const difficulty = parseInt(document.getElementById('difficultySelector').value);
+    
+    while (options.length < difficulty) {
+        const randomCard = learnedCards[Math.floor(Math.random() * learnedCards.length)];
+        if (randomCard.word !== currentQuizWord.word && !options.includes(randomCard.translation)) {
+            options.push(randomCard.translation);
+        }
+    }
+    
+    options.sort(() => Math.random() - 0.5);
+    
+    document.getElementById('quizOptions').innerHTML = options
+        .map(opt => `<div class="quiz-option" onclick="checkQuizAnswer('${escapeHtml(opt)}')">${escapeHtml(opt)}</div>`)
+        .join('');
+}
+
+function checkQuizAnswer(selected) {
+    const responseTime = (Date.now() - quizStartTime) / 1000;
+    const correctAnswer = currentQuizWord.translation;
+    const isCorrect = selected === correctAnswer;
+
+    currentQuizWord.attempts = (currentQuizWord.attempts || 0) + 1;
+    if (!isCorrect) {
+        currentQuizWord.errors = (currentQuizWord.errors || 0) + 1;
+    }
+
+    const timeDisplay = document.getElementById('responseTimeDisplay');
+    timeDisplay.textContent = `Время: ${responseTime.toFixed(1)} сек.`;
+    timeDisplay.style.opacity = '0';
+    setTimeout(() => {
+        timeDisplay.style.transition = 'opacity 0.3s';
+        timeDisplay.style.opacity = '1';
+    }, 10);
+
+    const options = document.querySelectorAll('.quiz-option');
+    options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt.textContent === correctAnswer) {
+            opt.style.background = '#34C75940';
+            opt.style.border = '1px solid #34C759';
+        } else if (opt.textContent === selected && !isCorrect) {
+            opt.style.background = '#FF453A40';
+            opt.style.border = '1px solid #FF453A';
+        }
+    });
+
+    setTimeout(() => {
+        document.getElementById('quizOptions').style.opacity = '0';
+        document.getElementById('quizQuestion').style.opacity = '0';
+        timeDisplay.style.opacity = '0';
+        
+        setTimeout(() => {
+            renderCards();
+            timeDisplay.textContent = '';
+            startQuiz();
+            
+            document.getElementById('quizOptions').style.opacity = '1';
+            document.getElementById('quizQuestion').style.opacity = '1';
+        }, 300);
+    }, 1500);
+}
+
+function changeFontSize(step) {
+    const bookContent = document.getElementById('bookContent');
+    const currentSize = parseInt(window.getComputedStyle(bookContent).fontSize);
+    const newSize = Math.max(12, currentSize + step);
+    bookContent.style.fontSize = `${newSize}px`;
+    localStorage.setItem('bookFontSize', newSize);
+}
+
+// Вспомогательные функции
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function escapeSingleQuote(str) {
+    return str.replace(/'/g, "\\'");
+}
+
+// Переключение вкладок
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active-tab'));
+        this.classList.add('active-tab');
+        
+        document.getElementById('newCards').style.display = 'none';
+        document.getElementById('learnedCards').style.display = 'none';
+        document.getElementById('archiveCards').style.display = 'none';
+        document.getElementById('quizContainer').style.display = 'none';
+        document.getElementById('textContainer').style.display = 'none';
+        
+        const tabName = this.getAttribute('data-tab');
+        const targetId = tabName === 'text' ? 'textContainer' : 
+                       tabName === 'quiz' ? 'quizContainer' : 
+                       tabName === 'archive' ? 'archiveCards' :
+                       `${tabName}Cards`;
+                       
+        document.getElementById(targetId).style.display = 'block';
+        
+        if (tabName === 'quiz') startQuiz();
+    });
+});
+
+// Инициализация при загрузке
+window.addEventListener('load', function() {
+        if (!('speechSynthesis' in window)) {
+        alert("Ваш браузер не поддерживает синтез речи. Функция озвучки будет недоступна.");
+    }
+    
+    initSpeech();
+
+    
+    const savedSize = localStorage.getItem('bookFontSize');
+    if (savedSize) {
+        document.getElementById('bookContent').style.fontSize = `${savedSize}px`;
+    }
+
+    document.getElementById('textSoundToggle').addEventListener('change', function() {
+        textSoundEnabled = this.checked;
+    });
+    
+    document.getElementById('quizSoundToggle').addEventListener('change', function() {
+        if (this.checked && currentQuizWord) {
+            speakWord(currentQuizWord.word);
+        }
+    });
+    
+    document.getElementById('hideWordToggle').addEventListener('change', function() {
+        if (currentQuizWord) {
+            const quizQuestion = document.getElementById('quizQuestion');
+            quizQuestion.textContent = this.checked ? '▬▬▬▬▬' : currentQuizWord.word;
+        }
+    });
+    
+    document.querySelector('.tab.active-tab').click();
+    
+    if (!audioPlayer.canPlayType) {
+        console.warn("Браузер не поддерживает аудиоэлемент");
+    }
+});
+    </script>
+</body>
+</html>
