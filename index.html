@@ -3,16 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Добавьте эти строки в <head> -->
-<link rel="manifest" href="/manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" default>
-<meta name="apple-mobile-web-app-title" content="Тренажер слов">
-<link rel="apple-touch-icon" href="/icons/icon-192.png">  <!-- Иконка для iOS -->
-
     <title>Тренажер слов "Робинзон Крузо"</title>
-
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -812,6 +803,90 @@
 
 
 
+    #batchActionType {
+        min-width: 200px;
+        height: 36px;
+        transition: none; /* Убираем анимацию чтобы не было "скачков" */
+    }
+    
+    .control-panel {
+        min-height: 60px; /* Фиксируем высоту панели */
+        display: flex;
+        align-items: center;
+    }
+    
+    .panel-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+
+    .edit-form {
+        padding: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 10px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 3px;
+        font-weight: bold;
+    }
+    
+    .form-group input[type="text"],
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #d1d1d6;
+        border-radius: 4px;
+    }
+    
+    .form-group textarea {
+        height: 60px;
+        resize: vertical;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .save-btn {
+        background-color: #34C759;
+        color: white;
+    }
+    
+    .cancel-btn {
+        background-color: #FF3B30;
+        color: white;
+    }
+    
+    .edit-btn {
+        background-color: #FF9500;
+        color: white;
+    }
+
+
+
+.edit-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-group input[type="text"]:invalid,
+.form-group textarea:invalid {
+    border-color: #FF3B30;
+}
+
+
 </style>
 
 </head>
@@ -846,13 +921,12 @@
             Загрузить
             <input type="file" id="fileInput" accept=".txt,.csv" hidden>
         </label>
-                
-        <select id="batchActionType">
-            <option value="all">Все карточки</option>
-            <option value="noun">Существительные</option>
-            <option value="verb">Глаголы</option>
-            <option value="adjective">Прилагательные</option>
-        </select>
+
+
+<select id="batchActionType" style="min-width: 200px; height: 36px;">
+    <option value="" disabled selected>Загрузите карточки</option>
+</select>
+
                 
         <button onclick="batchMoveToLearned()">Перенести</button>
         <button onclick="batchDeleteCards()" class="delete">Удалить</button>
@@ -966,6 +1040,8 @@ let quizStartTime;
 let currentQuizWord;
 let textSoundEnabled = true;
 
+ 
+
 // Элементы аудиоплеера
 const audioPlayer = document.getElementById('bookAudioPlayer');
 const audioPlayerContainer = document.getElementById('audioPlayerContainer');
@@ -1064,7 +1140,10 @@ function speakWord(word, isText = false) {
     }
 }
 
+
+
 // Функции для работы с аудио
+
 function handleAudioUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1110,7 +1189,11 @@ function showAudioError(message) {
     errorElement.style.display = 'block';
 }
 
+
+
+
 // Обработчик загрузки текста
+
 document.getElementById('textFileInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -1154,21 +1237,28 @@ document.getElementById('textFileInput').addEventListener('change', function(e) 
     reader.readAsText(file);
 });
 
+
+
+
 // Новые функции для групповых действий
+
 function batchMoveToLearned() {
-    const actionType = document.getElementById('batchActionType').value;
+    const actionType = document.getElementById("batchActionType").value;
     let cardsToMove = [];
-    
-    if (actionType === 'all') {
+
+    if (actionType === "all") {
         cardsToMove = [...newCards];
     } else {
         cardsToMove = newCards.filter(card => {
             const part = card.part.toLowerCase();
-            if (actionType === 'noun') return part.includes('noun') || part.includes('сущ');
-            if (actionType === 'verb') return part.includes('verb') || part.includes('глаг');
-            if (actionType === 'adjective') return part.includes('adjective') || part.includes('прил');
-            return true;
+            // Просто сравниваем с выбранным значением
+            return part.includes(actionType.toLowerCase());
         });
+    }
+    
+    if (cardsToMove.length === 0) {
+        alert("Нет карточек для перемещения!");
+        return;
     }
     
     learnedCards.push(...cardsToMove);
@@ -1177,6 +1267,23 @@ function batchMoveToLearned() {
     
     alert(`Перемещено ${cardsToMove.length} карточек в изученные`);
 }
+
+
+
+
+
+// Функция для определения вопросительных слов
+
+function isQuestionWord(word) {
+    const questionWords = [
+        "what", "who", "where", "when", "why", "how", 
+        "which", "whose", "whom", "сколько", "какой", 
+        "чей", "куда", "откуда", "зачем", "почему"
+    ];
+    return questionWords.includes(word.toLowerCase());
+}
+
+
 
 function batchDeleteCards() {
     const actionType = document.getElementById('batchActionType').value;
@@ -1201,63 +1308,170 @@ function batchDeleteCards() {
     alert(`Удалено ${cardsToDelete.length} карточек`);
 }
 
+
+
+
 // Основные функции
 
 // Основная функция создания карточек (модифицированная)
 
 function createCards() {
     const input = document.getElementById('wordInput').value;
-    if (!input.trim()) return;
-    
-    // Создаем временный объект для новых карточек
+    if (!input.trim()) {
+        showNotification('Введите данные для создания карточек', 2000);
+        return;
+    }
+
     const newUniqueCards = {};
-    
-    // Обрабатываем новые данные
+    let cardsCreated = 0;
+    let duplicatesSkipped = 0;
+
+    // Генератор уникальных ID
+    const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+    // Обработка каждой строки ввода
     input.split('\n')
         .filter(line => line.trim())
         .forEach(line => {
             const parts = line.split('|').map(p => p.trim());
+            if (parts.length < 3) {
+                console.warn('Пропущена строка с недостаточным количеством полей:', line);
+                return;
+            }
+
             const word = parts[0] || '';
+            const part = parts[1] || '';
             const translation = parts[2] || '';
+            const transcription = parts[3] || '';
+            const example = parts[4] || '';
+            const literal = parts[5] || '';
+
             const uniqueKey = `${word.toLowerCase()}_${translation.toLowerCase()}`;
-            
+
             if (!newUniqueCards[uniqueKey]) {
                 newUniqueCards[uniqueKey] = {
+                    id: generateId(), // Добавляем уникальный ID
                     word: word,
-                    part: parts[1] || '',
+                    part: part,
                     translation: translation,
-                    transcription: parts[3] || '',
-                    example: parts[4] || '',
-                    literal: parts[5] || '',
+                    transcription: transcription,
+                    example: example,
+                    literal: literal,
                     errors: 0,
-                    attempts: 0
+                    attempts: 0,
+                    created: new Date().toISOString(),
+                    lastEdited: null
                 };
+                cardsCreated++;
             } else {
-                // Объединяем примеры для дубликатов в новом вводе
-                if (parts[4] && !newUniqueCards[uniqueKey].example.includes(parts[4])) {
-                    newUniqueCards[uniqueKey].example += (newUniqueCards[uniqueKey].example ? "; " : "") + parts[4];
+                if (example && !newUniqueCards[uniqueKey].example.includes(example)) {
+                    newUniqueCards[uniqueKey].example += 
+                        (newUniqueCards[uniqueKey].example ? "; " : "") + example;
+                    newUniqueCards[uniqueKey].lastEdited = new Date().toISOString();
                 }
+                duplicatesSkipped++;
             }
         });
-    
-    // Фильтруем новые карточки, исключая существующие дубликаты
+
+    // Фильтрация уже существующих карточек
     const filteredNewCards = Object.values(newUniqueCards).filter(newCard => {
         const key = `${newCard.word.toLowerCase()}_${newCard.translation.toLowerCase()}`;
         return !allCards.some(existingCard => 
             `${existingCard.word.toLowerCase()}_${existingCard.translation.toLowerCase()}` === key
         );
     });
-    
-    // Добавляем новые карточки
+
+    // Добавление новых карточек
     allCards.push(...filteredNewCards);
     newCards.push(...filteredNewCards);
     
+    // Обновление интерфейса
     renderCards();
-    document.getElementById('wordInput').value = ''; // Автоматическая очистка
-    showNotification(`Добавлено ${filteredNewCards.length} новых карточек. Всего: ${allCards.length}`);
+    document.getElementById('wordInput').value = '';
+    updatePartsDropdown();
+    
+    // Уведомление о результате
+    let message = `Добавлено ${filteredNewCards.length} новых карточек. Всего: ${allCards.length}`;
+    if (duplicatesSkipped > 0) {
+        message += ` (пропущено ${duplicatesSkipped} дубликатов)`;
+    }
+    showNotification(message, 3000);
+
+    // Автоматическое скрытие поля ввода при большом количестве карточек
+    if (filteredNewCards.length > 5) {
+        document.getElementById('toggleUploadField').checked = true;
+        toggleUploadField();
+    }
 }
 
+// Вспомогательные функции для работы с карточками
+function editCard(cardId) {
+    const card = allCards.find(c => c.id === cardId);
+    if (!card) return;
+    
+    const cardElement = document.getElementById(`card-${cardId}`);
+    if (!cardElement) return;
+    
+    cardElement.querySelector('.card-header').style.display = 'none';
+    cardElement.querySelector('.hidden-part').style.display = 'none';
+    cardElement.querySelector('.edit-form').style.display = 'block';
+}
+
+
+
+function saveCard(cardId) {
+    const card = allCards.find(c => c.id === cardId);
+    if (!card) return;
+    
+    const cardElement = document.getElementById(`card-${cardId}`);
+    const form = cardElement.querySelector('.edit-form form');
+    
+    if (!form.word.value.trim() || !form.translation.value.trim()) {
+        showNotification('Заполните обязательные поля', 2000);
+        return;
+    }
+    
+    // Обновление данных карточки
+    card.word = form.word.value.trim();
+    card.part = form.part.value.trim();
+    card.translation = form.translation.value.trim();
+    card.transcription = form.transcription.value.trim();
+    card.example = form.example.value.trim();
+    card.literal = form.literal.value.trim();
+    card.lastEdited = new Date().toISOString();
+    
+    // Обновление интерфейса
+    renderCards();
+    updatePartsDropdown();
+    showNotification('Карточка успешно обновлена', 2000);
+}
+
+
+
+function cancelEdit(cardId) {
+    const cardElement = document.getElementById(`card-${cardId}`);
+    if (!cardElement) return;
+    
+    cardElement.querySelector('.card-header').style.display = 'flex';
+    cardElement.querySelector('.hidden-part').style.display = 'none';
+    cardElement.querySelector('.edit-form').style.display = 'none';
+}
+
+
+
+
+function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+
+
+
+
+
+
 // Обработчик загрузки файла (обновленный)
+
 document.getElementById('fileInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -1272,7 +1486,9 @@ document.getElementById('fileInput').addEventListener('change', function(e) {
     e.target.value = '';
 });
 
+
 // Функция очистки поля ввода (без удаления карточек)
+
 function clearInput() {
     document.getElementById('wordInput').value = '';
 }
@@ -1308,6 +1524,73 @@ function toggleUploadField() {
     textarea.style.display = checkbox.checked ? 'none' : 'block';
 }
 
+
+
+function getAvailableParts() {
+    const parts = [];
+    allCards.forEach(card => {
+        if (card.part && card.part.trim() !== '') {
+            parts.push(card.part);
+        }
+    });
+    return parts;
+}
+
+
+function updatePartsDropdown() {
+    const availableParts = getAvailableParts();
+    const dropdown = document.getElementById('batchActionType');
+    
+    // Сохраняем текущее выбранное значение
+    const currentValue = dropdown.value;
+    
+    // Очищаем dropdown, но оставляем placeholder
+    dropdown.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = "";
+    placeholder.textContent = allCards.length > 0 ? "Выберите категорию" : "Загрузите карточки";
+    placeholder.disabled = true;
+    if (!currentValue) placeholder.selected = true;
+    dropdown.appendChild(placeholder);
+
+    // Добавляем вариант "Все карточки" с количеством
+    if (allCards.length > 0) {
+        const allOption = document.createElement('option');
+        allOption.value = "all";
+        allOption.textContent = `Все карточки (${allCards.length})`;
+        dropdown.appendChild(allOption);
+    }
+    
+    // Создаем Map для группировки по частям речи и подсчета
+    const partsMap = new Map();
+    
+    allCards.forEach(card => {
+        const part = card.part.trim();
+        if (part) {
+            const count = partsMap.get(part) || 0;
+            partsMap.set(part, count + 1);
+        }
+    });
+
+    // Сортируем части речи по количеству карточек (по убыванию)
+    const sortedParts = Array.from(partsMap.entries()).sort((a, b) => b[1] - a[1]);
+    
+    // Добавляем варианты в выпадающий список с количеством
+    sortedParts.forEach(([part, count]) => {
+        const optElement = document.createElement('option');
+        optElement.value = part.toLowerCase();
+        optElement.textContent = `${part} (${count})`;
+        dropdown.appendChild(optElement);
+    });
+    
+    // Восстанавливаем выбранное значение, если оно есть
+    if (currentValue && dropdown.querySelector(`option[value="${currentValue}"]`)) {
+        dropdown.value = currentValue;
+    }
+}
+
+
+
 function renderCards() {
     // Новые карточки
     document.getElementById('cardsDisplay').innerHTML = newCards
@@ -1325,63 +1608,90 @@ function renderCards() {
         .sort((a, b) => a.word.localeCompare(b.word))
         .map(card => createCardHTML(card, true, true))
         .join('');
+    
+    // Обновляем выпадающий список
+    updatePartsDropdown();
 }
 
+
 function createCardHTML(card, isLearned, isArchived) {
-    const progressPercent = card.attempts > 0 
-        ? Math.round((1 - (card.errors / card.attempts)) * 100)
-        : 0;
-    
     return `
-        <div class="card" onclick="toggleCardDetails(this)">
-            <div>
+        <div class="card" id="card-${card.id}">
+            <div class="card-header" onclick="toggleCardDetails(this.parentNode)">
                 <strong>${escapeHtml(card.word)}</strong>
-                <button class="speak-btn" onclick="event.stopPropagation(); speakWord('${escapeSingleQuote(card.word)}')">🔊</button>
+                <button class="speak-btn" onclick="speakWord('${escapeSingleQuote(card.word)}')">🔊</button>
                 <span>(${escapeHtml(card.part)})</span>
                 <div class="card-actions">
+                    <button class="card-btn edit-btn" onclick="editCard('${card.id}')" title="Редактировать">✎</button>
                     ${isArchived ? `
-                        <button class="card-btn" onclick="event.stopPropagation(); moveFromArchive('${escapeSingleQuote(card.word)}')" title="Вернуть в изученные">↩︎</button>
-                    ` : isLearned ? `
-                        <button class="card-btn delete-btn" onclick="event.stopPropagation(); deleteCard('${escapeSingleQuote(card.word)}', true)">✕</button>
-                        <button class="card-btn" onclick="event.stopPropagation(); moveToNew('${escapeSingleQuote(card.word)}')" title="Вернуть в новые">↩︎</button>
-                        <button class="card-btn archive-btn" onclick="event.stopPropagation(); moveToArchive('${escapeSingleQuote(card.word)}')" title="В архив">🗄</button>
-                    ` : `
-                        <button class="card-btn delete-btn" onclick="event.stopPropagation(); deleteCard('${escapeSingleQuote(card.word)}', false)">✕</button>
-                        <button class="card-btn mark-learned" onclick="event.stopPropagation(); markAsLearned('${escapeSingleQuote(card.word)}')">✓</button>
+                         <button class="card-btn" onclick="moveFromArchive('${card.id}')" title="Вернуть">↩︎</button>
+` : isLearned ? `
+    <button class="card-btn delete-btn" onclick="deleteCard('${card.id}', true)">✕</button>
+    <button class="card-btn" onclick="moveToNew('${card.id}')" title="Вернуть">↩︎</button>
+    <button class="card-btn archive-btn" onclick="moveToArchive('${card.id}')" title="Архив">🗄</button>
+` : `
+    <button class="card-btn delete-btn" onclick="deleteCard('${card.id}', false)">✕</button>
+    <button class="card-btn mark-learned" onclick="markAsLearned('${card.id}')">✓</button>
                     `}
                 </div>
             </div>
-            ${isLearned && !isArchived ? `
-                <div class="word-progress">
-                    Прогресс: ${progressPercent}% (${card.attempts - card.errors}/${card.attempts})
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
-                    </div>
-                </div>
-            ` : ''}
+            ${isLearned && !isArchived ? progressBarHTML(card) : ''}
             <div class="hidden-part">
-                <div><b>Перевод:</b> ${escapeHtml(card.translation)}</div>
-                ${card.transcription ? `<div><b>Транскрипция:</b> ${card.transcription}</div>` : ''}
-                ${card.example ? `
-                            <div style="margin-top:8px;">
-        <b>Пример:</b> ${escapeHtml(card.example)}
-        <button class="speak-btn" onclick="event.stopPropagation(); speakWord('${escapeSingleQuote(card.example)}')">🔊</button>
-    </div>
-
-                ` : ''}
-                ${card.literal ? `<div><small>Дословно: ${escapeHtml(card.literal)}</small></div>` : ''}
+                ${cardDetailsHTML(card)}
+            </div>
+            <div class="edit-form" style="display: none;">
+                ${editFormHTML(card)}
             </div>
         </div>
     `;
 }
 
-function deleteCard(word, isLearned) {
+
+function editCard(cardId) {
+    const card = allCards.find(c => c.id === cardId);
+    if (!card) return;
+    
+    const cardElement = document.getElementById(`card-${cardId}`);
+    cardElement.querySelector('.card-header').style.display = 'none';
+    cardElement.querySelector('.hidden-part').style.display = 'none';
+    cardElement.querySelector('.edit-form').style.display = 'block';
+}
+
+function saveCard(cardId) {
+    const card = allCards.find(c => c.id === cardId);
+    if (!card) return;
+    
+    const cardElement = document.getElementById(`card-${cardId}`);
+    const form = cardElement.querySelector('.edit-form form');
+    
+    card.word = form.word.value;
+    card.part = form.part.value;
+    card.translation = form.translation.value;
+    card.transcription = form.transcription.value;
+    card.example = form.example.value;
+    card.literal = form.literal.value;
+    
+    renderCards();
+    showNotification('Карточка обновлена', 2000);
+}
+
+function cancelEdit(cardId) {
+    const cardElement = document.getElementById(`card-${cardId}`);
+    cardElement.querySelector('.card-header').style.display = 'flex';
+    cardElement.querySelector('.hidden-part').style.display = 'none';
+    cardElement.querySelector('.edit-form').style.display = 'none';
+}
+
+
+
+
+function deleteCard(cardId, isLearned) {
     if (isLearned) {
-        learnedCards = learnedCards.filter(c => c.word !== word);
+        learnedCards = learnedCards.filter(c => c.id !== cardId);
     } else {
-        newCards = newCards.filter(c => c.word !== word);
+        newCards = newCards.filter(c => c.id !== cardId);
     }
-    allCards = allCards.filter(c => c.word !== word);
+    allCards = allCards.filter(c => c.id !== cardId);
     renderCards();
 }
 
@@ -1390,8 +1700,9 @@ function toggleCardDetails(cardElement) {
     details.style.display = details.style.display === 'block' ? 'none' : 'block';
 }
 
-function markAsLearned(word) {
-    const cardIndex = newCards.findIndex(c => c.word === word);
+
+function markAsLearned(cardId) {
+    const cardIndex = newCards.findIndex(c => c.id === cardId);
     if (cardIndex === -1) return;
     
     learnedCards.push(newCards[cardIndex]);
@@ -1399,8 +1710,8 @@ function markAsLearned(word) {
     renderCards();
 }
 
-function moveToNew(word) {
-    const cardIndex = learnedCards.findIndex(c => c.word === word);
+function moveToNew(cardId) {
+    const cardIndex = learnedCards.findIndex(c => c.id === cardId);
     if (cardIndex === -1) return;
     
     newCards.unshift(learnedCards[cardIndex]);
@@ -1408,8 +1719,8 @@ function moveToNew(word) {
     renderCards();
 }
 
-function moveToArchive(word) {
-    const cardIndex = learnedCards.findIndex(c => c.word === word);
+function moveToArchive(cardId) {
+    const cardIndex = learnedCards.findIndex(c => c.id === cardId);
     if (cardIndex === -1) return;
     
     archivedCards.push(learnedCards[cardIndex]);
@@ -1417,8 +1728,9 @@ function moveToArchive(word) {
     renderCards();
 }
 
-function moveFromArchive(word) {
-    const cardIndex = archivedCards.findIndex(c => c.word === word);
+
+function moveFromArchive(cardId) {
+    const cardIndex = archivedCards.findIndex(c => c.id === cardId);
     if (cardIndex === -1) return;
     
     learnedCards.push(archivedCards[cardIndex]);
@@ -1440,7 +1752,9 @@ function filterArchive() {
 }
 
 
+
 // Викторина
+
 function startQuiz() {
     if (learnedCards.length < 3) {
         document.getElementById('quizQuestion').innerHTML = 
@@ -1530,7 +1844,7 @@ function checkQuizAnswer(selected) {
             document.getElementById('quizOptions').style.opacity = '1';
             document.getElementById('quizQuestion').style.opacity = '1';
         }, 300);
-    }, 1500);
+    }, 1000);
 }
 
 function changeFontSize(step) {
@@ -1542,6 +1856,7 @@ function changeFontSize(step) {
 }
 
 // Вспомогательные функции
+
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -1552,7 +1867,77 @@ function escapeSingleQuote(str) {
     return str.replace(/'/g, "\\'");
 }
 
+
+function progressBarHTML(card) {
+    const progressPercent = card.attempts > 0 
+        ? Math.round((1 - (card.errors / card.attempts)) * 100)
+        : 0;
+    
+    return `
+        <div class="word-progress">
+            Прогресс: ${progressPercent}% (${card.attempts - card.errors}/${card.attempts})
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progressPercent}%"></div>
+            </div>
+        </div>
+    `;
+}
+
+function cardDetailsHTML(card) {
+    return `
+        <div><b>Перевод:</b> ${escapeHtml(card.translation)}</div>
+        ${card.transcription ? `<div><b>Транскрипция:</b> ${card.transcription}</div>` : ''}
+        ${card.example ? `
+            <div style="margin-top:8px;">
+                <b>Пример:</b> ${escapeHtml(card.example)}
+                <button class="speak-btn" onclick="speakWord('${escapeSingleQuote(card.example)}')">🔊</button>
+            </div>
+        ` : ''}
+        ${card.literal ? `<div><small>Дословно: ${escapeHtml(card.literal)}</small></div>` : ''}
+    `;
+}
+
+
+function editFormHTML(card) {
+    return `
+        <form onsubmit="saveCard('${card.id}'); return false;">
+            <div class="form-group">
+                <label>Слово:</label>
+                <input type="text" name="word" value="${escapeHtml(card.word)}" required>
+            </div>
+            <div class="form-group">
+                <label>Часть речи:</label>
+                <input type="text" name="part" value="${escapeHtml(card.part)}">
+            </div>
+            <div class="form-group">
+                <label>Перевод:</label>
+                <input type="text" name="translation" value="${escapeHtml(card.translation)}" required>
+            </div>
+            <div class="form-group">
+                <label>Транскрипция:</label>
+                <input type="text" name="transcription" value="${escapeHtml(card.transcription || '')}">
+            </div>
+            <div class="form-group">
+                <label>Пример:</label>
+                <textarea name="example">${escapeHtml(card.example || '')}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Дословный перевод:</label>
+                <input type="text" name="literal" value="${escapeHtml(card.literal || '')}">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="save-btn">Сохранить</button>
+                <button type="button" class="cancel-btn" onclick="cancelEdit('${card.id}')">Отмена</button>
+            </div>
+        </form>
+    `;
+}
+
+
+
+
 // Переключение вкладок
+
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', function() {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active-tab'));
@@ -1575,6 +1960,8 @@ document.querySelectorAll('.tab').forEach(tab => {
         if (tabName === 'quiz') startQuiz();
     });
 });
+
+
 
 // Инициализация при загрузке
 window.addEventListener('load', function() {
